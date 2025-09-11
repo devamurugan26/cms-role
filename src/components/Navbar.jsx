@@ -16,8 +16,7 @@ import { Home } from "@mui/icons-material";
 
 export default function Navbar({ toggleDrawer }) {
   // Example: random placeholder brand
-  const brand = ["BizCMS", "NexPanel", "CMSPro", "DashMaster"];
-  const randomBrand = brand[Math.floor(Math.random() * brand.length)];
+
 
   return (
     <AppBar
@@ -43,7 +42,7 @@ export default function Navbar({ toggleDrawer }) {
           component="div"
           sx={{ flexGrow: 1, fontWeight: "bold", letterSpacing: 1 }}
         >
-          {randomBrand}
+       Global Bar Drafting
         </Typography>
 
         {/* Right: Icons and Avatar */}
@@ -54,7 +53,7 @@ export default function Navbar({ toggleDrawer }) {
             </Badge>
           </IconButton>
 
-       
+          devakumar
           <Avatar alt="User" src="/static/images/avatar/1.jpg" />
         </Box>
       </Toolbar>
