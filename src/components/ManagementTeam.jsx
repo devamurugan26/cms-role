@@ -21,6 +21,7 @@ const ManagementTeam = () => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  
   // Simulated API call
   useEffect(() => {
     const fetchRoles = async () => {
