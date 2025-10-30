@@ -1,4 +1,4 @@
 // apiConfig.ts
-export const API_BASE_URL = "https://localhost:7002/api";
+export const API_URL = "https://localhost:7124/api";
 
 

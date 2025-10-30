@@ -56,38 +56,7 @@ const Home = () => {
     },
   ]);
 
-  const [open, setOpen] = useState(false);
-  const [newCard, setNewCard] = useState({
-    title: "",
-    icon: "AccountBalanceIcon",
-    description: "",
-    color: "#4caf50",
-  });
-
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNewCard((prev) => ({ ...prev, [name]: value }));
-  };
   const navigate = useNavigate();
-  const handleAddCard = () => {
-    setDashboardCards((prev) => [
-      ...prev,
-      {
-        ...newCard,
-        icon: availableIcons[newCard.icon], // convert string to JSX
-      },
-    ]);
-    setNewCard({
-      title: "",
-      icon: "AccountBalanceIcon",
-      description: "",
-      color: "#4caf50",
-    });
-    handleClose();
-  };
 
   return (
     <Box sx={{ m: 1 }}>
@@ -104,9 +73,7 @@ const Home = () => {
           Dashboard
         </Typography>
 
-        <IconButton color="primary" onClick={handleOpen}>
-          <AddCircleIcon sx={{ fontSize: 32 }} />
-        </IconButton>
+      
       </Box>
 
       {/* Cards */}
@@ -184,57 +151,7 @@ const Home = () => {
       </Grid>
 
       {/* Popup Dialog */}
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>Add New Card</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Title"
-            name="title"
-            value={newCard.title}
-            onChange={handleChange}
-            margin="dense"
-          />
-          <TextField
-            select
-            fullWidth
-            label="Icon"
-            name="icon"
-            value={newCard.icon}
-            onChange={handleChange}
-            margin="dense"
-          >
-            {Object.keys(availableIcons).map((key) => (
-              <MenuItem key={key} value={key}>
-                {key}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            fullWidth
-            label="Description"
-            name="description"
-            value={newCard.description}
-            onChange={handleChange}
-            margin="dense"
-            multiline
-          />
-          <TextField
-            fullWidth
-            label="Color (Hex Code)"
-            name="color"
-            value={newCard.color}
-            onChange={handleChange}
-            margin="dense"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button variant="contained" onClick={handleAddCard}>
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
+    
     </Box>
   );
 };

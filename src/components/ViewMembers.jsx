@@ -18,11 +18,12 @@ import {
   TableRow,
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const demoMembers = [
-  { name: "John Doe", role: "Sales Head", createdBy: "Admin" },
+  { name: "John Doe", role: "Production Manager", createdBy: "Admin" },
   { name: "Alice Smith", role: "Production Manager", createdBy: "Admin" },
-  { name: "Bob Johnson", role: "Global Component Viewer", createdBy: "Admin" },
+  { name: "Bob Johnson", role: "Production Manager", createdBy: "Admin" },
 ];
 
 const ViewMembers = ({ title = "Department Members", initialMembers = demoMembers }) => {
@@ -30,7 +31,7 @@ const ViewMembers = ({ title = "Department Members", initialMembers = demoMember
   const [open, setOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
   const [formData, setFormData] = useState({ name: "", role: "", createdBy: "" });
-
+  const navigate = useNavigate();
   const handleOpen = (index = null) => {
     if (index !== null) {
       setFormData(members[index]);
@@ -56,6 +57,9 @@ const ViewMembers = ({ title = "Department Members", initialMembers = demoMember
   };
 
   const handleDelete = (index) => setMembers(members.filter((_, i) => i !== index));
+const handleRowClick = () => {
+  navigate("/Memebertaskprofile");
+};
 
   return (
     <Box sx={{ m: 4 }}>
@@ -84,7 +88,7 @@ const ViewMembers = ({ title = "Department Members", initialMembers = demoMember
           <TableBody>
             {members.length > 0 ? (
               members.map((member, index) => (
-                <TableRow key={index} hover>
+                <TableRow key={index} hover onClick={() => handleRowClick()}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{member.name}</TableCell>
                   <TableCell>{member.role}</TableCell>

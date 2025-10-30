@@ -13,15 +13,20 @@ import HomeIcon from "@mui/icons-material/Home";
 import ArticleIcon from "@mui/icons-material/Article";
 import PeopleIcon from "@mui/icons-material/People";
 import SettingsIcon from "@mui/icons-material/Settings";
+import { useNavigate } from "react-router-dom";
 
 const miniWidth = 60;
 
 export default function Sidebar() {
+  const navigate = useNavigate();
+
   const menuItems = [
-    { text: "Home", icon: <HomeIcon /> },
-    { text: "Posts", icon: <ArticleIcon /> },
-    { text: "Users", icon: <PeopleIcon /> },
-    { text: "Settings", icon: <SettingsIcon /> },
+    { text: "MyTask", icon: <ArticleIcon />, path: "/MyTask" },
+
+    { text: "Dashboard", icon: <HomeIcon />, path: "/Dashboard" },
+    { text: "Users", icon: <PeopleIcon />, path: "/users" },
+    { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
+    { text: "MasterTableManager", icon: <SettingsIcon />, path: "/MasterTableManager" },
   ];
 
   return (
@@ -31,7 +36,7 @@ export default function Sidebar() {
         width: miniWidth,
         flexShrink: 0,
         "& .MuiDrawer-paper": {
-          width:  miniWidth,
+          width: miniWidth,
           transition: "width 0.3s",
           overflowX: "hidden",
         },
@@ -48,11 +53,12 @@ export default function Sidebar() {
                   justifyContent: "center",
                   px: 2.5,
                 }}
+                onClick={() => navigate(item.path)} // ✅ navigate on click
               >
                 <ListItemIcon
                   sx={{
                     minWidth: 0,
-                    mr:  "auto",
+                    mr: "auto",
                     justifyContent: "center",
                   }}
                 >
@@ -60,7 +66,7 @@ export default function Sidebar() {
                 </ListItemIcon>
                 <ListItemText
                   primary={item.text}
-                  sx={{ opacity:  0 }}
+                  sx={{ opacity: 0 }}
                 />
               </ListItemButton>
             </Tooltip>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useContext } from "react";
 import {
   AppBar,
   Toolbar,
@@ -13,10 +13,10 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import MessageIcon from "@mui/icons-material/Message";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { Home } from "@mui/icons-material";
-
+import { useAuth } from "../components/AuthProvider";
 export default function Navbar({ toggleDrawer }) {
   // Example: random placeholder brand
-
+const { user } = useAuth();
 
   return (
     <AppBar
@@ -52,8 +52,7 @@ export default function Navbar({ toggleDrawer }) {
               <NotificationsIcon />
             </Badge>
           </IconButton>
-
-          devakumar
+          <div>{user ? `Hello, ${user.username || user.email}` : "Not logged in"}</div>
           <Avatar alt="User" src="/static/images/avatar/1.jpg" />
         </Box>
       </Toolbar>
