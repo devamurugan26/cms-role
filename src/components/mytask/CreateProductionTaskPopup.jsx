@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
 import axios from "axios";
-import { API_URL } from "../Config/api";
+import { API_URL } from "../../Config/api";
 
 const CreateProductionTaskPopup = ({ open, onClose }) => {
   const [projectName, setProjectName] = useState("");

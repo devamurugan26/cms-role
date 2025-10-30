@@ -40,8 +40,9 @@ import {
 import CreateProductionTaskPopup from "./CreateProductionTaskPopup";
 import axios from "axios";
 import { useEffect } from "react";
-import { API_URL } from "../Config/api";
+import { API_URL } from "../../Config/api";
 import { red } from "@mui/material/colors";
+import Productiontaskviewpopups from "./Productiontaskviewpopups";
 
 export default function TaskManagerCMS() {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -383,57 +384,10 @@ export default function TaskManagerCMS() {
       <Dialog
         open={openView}
         onClose={() => setOpenView(false)}
-        maxWidth="sm"
+        maxWidth="lg"
         fullWidth
       >
-        <DialogTitle>Task Details</DialogTitle>
-        {selectedTask && (
-          <DialogContent>
-            <Typography variant="subtitle1" fontWeight={600}>
-              {selectedTask.title}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              {selectedTask.company} • Due: {selectedTask.dueDate}
-            </Typography>
-            <Chip
-              label={selectedTask.priority}
-              color={priorityColor[selectedTask.priority]}
-              size="small"
-              sx={{ mr: 1 }}
-            />
-            <Chip
-              label={selectedTask.status}
-              color={statusColor[selectedTask.status]}
-              size="small"
-              variant="outlined"
-            />
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Replies & Updates
-            </Typography>
-            {selectedTask.replies.length === 0 ? (
-              <Typography variant="body2" color="text.secondary">
-                No replies yet.
-              </Typography>
-            ) : (
-              selectedTask.replies.map((r) => (
-                <Paper
-                  key={r.id}
-                  variant="outlined"
-                  sx={{ p: 1.5, mb: 1, borderRadius: 2, bgcolor: "#fafafa" }}
-                >
-                  <Typography variant="body2" fontWeight={600} color="primary">
-                    {r.author} • {r.date}
-                  </Typography>
-                  <Typography variant="body2">{r.message}</Typography>
-                </Paper>
-              ))
-            )}
-          </DialogContent>
-        )}
-        <DialogActions>
-          <Button onClick={() => setOpenView(false)}>Close</Button>
-        </DialogActions>
+     <Productiontaskviewpopups/>
       </Dialog>
 
       {/* Reply Dialog */}
