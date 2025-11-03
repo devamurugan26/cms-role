@@ -18,20 +18,24 @@ import {
   Paper,
   IconButton,
   Stack,
+  Divider,
+  Collapse,
+  Tooltip,
 } from "@mui/material";
-import { Edit, Delete } from "@mui/icons-material";
+import { Edit, Delete, PersonAdd, Lock, ExpandLess, ExpandMore } from "@mui/icons-material";
 import axios from "axios";
 import { API_URL } from "../Config/api";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
-  const [departmentRoles, setDepartmentRoles] = useState([]); // array of departments with roles
+  const [departmentRoles, setDepartmentRoles] = useState([]);
   const [open, setOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     name: "",
-    department: "",
-    role: "",
+    department_Id: "",
+    role_Id: "",
     email: "",
     Password: "",
   });
@@ -46,17 +50,11 @@ const Users = () => {
   const fetchRoles = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) return console.error("No token found");
-
+      if (!token) return;
       const res = await axios.get(`${API_URL}/Users/RolesLoad`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (res.data.success) {
-        setDepartmentRoles(res.data.data || []);
-      } else {
-        console.error("Failed to load roles:", res.data.message);
-      }
+      if (res.data.success) setDepartmentRoles(res.data.data || []);
     } catch (err) {
       console.error("Error fetching roles:", err);
     }
@@ -65,21 +63,16 @@ const Users = () => {
   const UserRoleListLoad = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) return console.error("No token found");
-
+      if (!token) return;
       const res = await axios.get(`${API_URL}/Users/UserRoleListLoad`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (res.data.success) {
-        setUsers(res.data.data || []);
-      } else {
-        console.error("Failed to load roles:", res.data.message);
-      }
+      if (res.data.success) setUsers(res.data.data || []);
     } catch (err) {
-      console.error("Error fetching roles:", err);
+      console.error("Error loading user list:", err);
     }
   };
+
   const handleOpen = (user = null, index = null) => {
     if (user) {
       const departmentObj = departmentRoles.find(
@@ -108,13 +101,13 @@ const Users = () => {
       });
       setEditingIndex(null);
     }
+    setShowPassword(false);
     setOpen(true);
   };
 
   const handleClose = () => setOpen(false);
 
   const handleSave = async () => {
-    debugger
     if (!form.name || !form.department_Id || !form.role_Id || !form.email) {
       alert("Please fill all required fields!");
       return;
@@ -122,7 +115,7 @@ const Users = () => {
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) return console.error("No token found");
+      if (!token) return;
 
       const param = {
         User_Id: form.user_Id || null,
@@ -149,17 +142,16 @@ const Users = () => {
         alert(res.data.message || "Failed to save user!");
       }
     } catch (err) {
-      console.error("Error saving role:", err);
+      console.error("Error saving user:", err);
     }
   };
 
   const handleDelete = async (userId) => {
-    debugger
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) return console.error("No token found");
+      if (!token) return;
 
       const res = await axios.post(
         `${API_URL}/Users/DeleteUserRole`,
@@ -167,11 +159,8 @@ const Users = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (res.data.success) {
-        await UserRoleListLoad();
-      } else {
-        alert(res.data.message || "Failed to delete user!");
-      }
+      if (res.data.success) await UserRoleListLoad();
+      else alert(res.data.message || "Failed to delete user!");
     } catch (err) {
       console.error("Error deleting user:", err);
     }
@@ -183,17 +172,34 @@ const Users = () => {
   };
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 4 }, fontFamily: "Roboto, sans-serif" }}>
-      <Typography variant="h4" fontWeight={700} mb={3}>
-        User Management
-      </Typography>
+    <Box sx={{ p: { xs: 2, sm: 4 }, fontFamily: "Inter, sans-serif" }}>
+      {/* Header */}
+      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
+        <Typography variant="h5" fontWeight={700}>
+          👥 User Management
+        </Typography>
+        <Button
+          startIcon={<PersonAdd />}
+          variant="contained"
+          color="primary"
+          onClick={() => handleOpen()}
+        >
+          Add User
+        </Button>
+      </Stack>
 
-      {/* Filters & Add Button */}
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={2}
-        mb={3}
-        alignItems={{ xs: "stretch", sm: "center" }}
+      {/* Filter Bar */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          mb: 3,
+          border: "1px solid #e0e0e0",
+          borderRadius: 2,
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 2,
+        }}
       >
         <TextField
           select
@@ -203,8 +209,8 @@ const Users = () => {
             setFilterDept(e.target.value);
             setFilterRole("");
           }}
-          sx={{ minWidth: 220 }}
           size="small"
+          sx={{ minWidth: 220 }}
         >
           <MenuItem value="">All</MenuItem>
           {departmentRoles.map((dep) => (
@@ -219,8 +225,8 @@ const Users = () => {
           label="Filter by Role"
           value={filterRole}
           onChange={(e) => setFilterRole(e.target.value)}
-          sx={{ minWidth: 220 }}
           size="small"
+          sx={{ minWidth: 220 }}
           disabled={!filterDept}
         >
           <MenuItem value="">All</MenuItem>
@@ -231,110 +237,98 @@ const Users = () => {
               </MenuItem>
             ))}
         </TextField>
+      </Paper>
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => handleOpen()}
-          sx={{ height: 40 }}
-        >
-          Add User
-        </Button>
-      </Stack>
-
-      {/* User Table */}
-      <TableContainer component={Paper} sx={{ boxShadow: 3 }}>
+      {/* Table */}
+      <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 2 }}>
         <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-              {["S.No", "Name", "Department", "Role", "Email", "Actions"].map(
-                (header) => (
-                  <TableCell key={header} sx={{ fontWeight: 600 }}>
-                    {header}
-                  </TableCell>
-                )
-              )}
+            <TableRow sx={{ backgroundColor: "#f8f9fa" }}>
+              {["#", "Name", "Department", "Role", "Email", "Actions"].map((header) => (
+                <TableCell key={header} sx={{ fontWeight: 600 }}>
+                  {header}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
-
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
                   No users found
                 </TableCell>
               </TableRow>
             ) : (
-              users.map((user, index) => {
-                return (
-                  <TableRow key={index} hover>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>{user.name ?? "N/A"}</TableCell>
-                    <TableCell>{user.department ?? "N/A"}</TableCell>
-                    <TableCell>{user.role ?? "N/A"}</TableCell>
-                    <TableCell>{user.email ?? "N/A"}</TableCell>
-                    <TableCell>
-                      <IconButton
-                        onClick={() => handleOpen(user, index)}
-                        color="primary"
-                      >
+              users.map((user, index) => (
+                <TableRow
+                  key={index}
+                  hover
+                  sx={{
+                    "&:nth-of-type(odd)": { backgroundColor: "#fafafa" },
+                  }}
+                >
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.department}</TableCell>
+                  <TableCell>{user.role}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <Tooltip title="Edit">
+                      <IconButton color="primary" onClick={() => handleOpen(user, index)}>
                         <Edit />
                       </IconButton>
-                      <IconButton
-                        onClick={() => handleDelete(user.user_Id)}
-                        color="error"
-                      >
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                      <IconButton color="error" onClick={() => handleDelete(user.user_Id)}>
                         <Delete />
                       </IconButton>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>
       </TableContainer>
 
-      {/* Add/Edit Dialog */}
+      {/* Dialog */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
         <DialogTitle sx={{ fontWeight: 600 }}>
-          {editingIndex !== null ? "Edit User" : "Add User"}
+          {editingIndex !== null ? "Edit User" : "Add New User"}
         </DialogTitle>
-        <DialogContent sx={{ mt: 1 }}>
-          <Stack spacing={2} sx={{ mt: 1 }}>
+        <Divider />
+        <DialogContent sx={{ mt: 2 }}>
+          <Typography variant="subtitle2" color="text.secondary" mb={1}>
+            Basic Information
+          </Typography>
+          <Stack spacing={2}>
             <TextField
-              label="Name"
+              label="Full Name"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               fullWidth
               size="small"
             />
-
             <TextField
-              label="Email"
+              label="Email Address"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               fullWidth
               size="small"
             />
+          </Stack>
 
-            {/* Show password only on add */}
-            {editingIndex === null && (
-              <TextField
-                label="Password"
-                type="password"
-                value={form.Password}
-                onChange={(e) => setForm({ ...form, Password: e.target.value })}
-                fullWidth
-                size="small"
-              />
-            )}
+          <Divider sx={{ my: 3 }} />
 
-            {/* Department dropdown */}
+          <Typography variant="subtitle2" color="text.secondary" mb={1}>
+            Access Settings
+          </Typography>
+
+          <Stack direction="row" spacing={2}>
             <TextField
               select
               label="Department"
-              value={form.department_Id || ""}
+              value={form.department_Id}
               onChange={(e) =>
                 setForm({ ...form, department_Id: e.target.value, role_Id: "" })
               }
@@ -348,30 +342,62 @@ const Users = () => {
               ))}
             </TextField>
 
-            {/* Role dropdown (depends on department) */}
-            {form.department_Id && (
+            <TextField
+              select
+              label="Role"
+              value={form.role_Id}
+              onChange={(e) => setForm({ ...form, role_Id: e.target.value })}
+              fullWidth
+              size="small"
+              disabled={!form.department_Id}
+            >
+              {getRolesForDepartment(form.department_Id).map((role) => (
+                <MenuItem key={role.role_Id} value={role.role_Id}>
+                  {role.role_Name}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Stack>
+
+          <Box mt={2}>
+            {editingIndex === null ? (
               <TextField
-                select
-                label="Role"
-                value={form.role_Id || ""}
-                onChange={(e) => setForm({ ...form, role_Id: e.target.value })}
+                label="Password"
+                type="password"
+                value={form.Password}
+                onChange={(e) => setForm({ ...form, Password: e.target.value })}
                 fullWidth
                 size="small"
-              >
-                {getRolesForDepartment(form.department_Id).map((role) => (
-                  <MenuItem key={role.role_Id} value={role.role_Id}>
-                    {role.role_Name}
-                  </MenuItem>
-                ))}
-              </TextField>
+              />
+            ) : (
+              <>
+                <Button
+                  startIcon={<Lock />}
+                  color="secondary"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  Change Password {showPassword ? <ExpandLess /> : <ExpandMore />}
+                </Button>
+                <Collapse in={showPassword}>
+                  <TextField
+                    label="New Password"
+                    type="password"
+                    value={form.Password}
+                    onChange={(e) => setForm({ ...form, Password: e.target.value })}
+                    fullWidth
+                    size="small"
+                    sx={{ mt: 1 }}
+                  />
+                </Collapse>
+              </>
             )}
-          </Stack>
+          </Box>
         </DialogContent>
 
-        <DialogActions>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={handleClose}>Cancel</Button>
           <Button onClick={handleSave} variant="contained" color="primary">
-            {editingIndex !== null ? "Update" : "Add"}
+            {editingIndex !== null ? "Update" : "Add User"}
           </Button>
         </DialogActions>
       </Dialog>

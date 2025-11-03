@@ -38,7 +38,7 @@ useEffect(() => {
   setLoading(false);
 }, []);
 
-  const login = (userData, redirectPath = "/dashboard") => {debugger
+  const login = (userData, redirectPath = "/MyTask") => {debugger
     localStorage.setItem("token", userData.token);
     localStorage.setItem("user", JSON.stringify(userData));
 

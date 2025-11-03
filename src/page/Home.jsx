@@ -69,7 +69,7 @@ const Home = () => {
           mb: 4,
         }}
       >
-        <Typography variant="h4" sx={{ fontWeight: 700 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>
           Dashboard
         </Typography>
 

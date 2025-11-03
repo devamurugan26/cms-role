@@ -3,18 +3,17 @@ import axios from "axios";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Grid,
-  Input,
+  Typography,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Paper,
-  Typography,
   IconButton,
+  InputBase,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
 } from "@mui/material";
 import BusinessIcon from "@mui/icons-material/Business";
@@ -24,89 +23,59 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { API_URL } from "../Config/api";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from "@mui/material";
+import TaskIcon from '@mui/icons-material/Task';
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 export default function MasterTableManager() {
   const [selectedType, setSelectedType] = useState("Client");
   const [formValue, setFormValue] = useState("");
   const [masterData, setMasterData] = useState([]);
-  const [editingIndex, setEditingIndex] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [editValue, setEditValue] = useState("");
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user"));
+
   const tableOptions = [
     { name: "Client", icon: <BusinessIcon /> },
     { name: "RequestType", icon: <RequestQuoteIcon /> },
     { name: "ReleaseType", icon: <RocketLaunchIcon /> },
-    { name: "priority", icon: <RocketLaunchIcon /> },
-    { name: "TaskStatus", icon: <RocketLaunchIcon /> },
+    { name: "priority", icon: <PriorityHighIcon /> },
+    { name: "TaskStatus", icon: <TaskIcon /> },
   ];
 
-  const token = localStorage.getItem("token");
+  useEffect(() => {
+    loadData();
+  }, []);
 
-  const user = JSON.parse(localStorage.getItem("user"));
-  // Load data from API
   const loadData = async () => {
     try {
-      const res = await axios.post(
-        `${API_URL}/Master/MasterLoad`,
-        {}, // POST body (empty object if no payload)
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      debugger;
-      if (res.data.success) {
-        setMasterData(res.data.data);
-      }
+      const res = await axios.post(`${API_URL}/Master/MasterLoad`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data.success) setMasterData(res.data.data);
     } catch (err) {
       console.error("Error loading data:", err);
     }
   };
-  const handleEdit = (item) => {
-    setEditingItem(item);
-    setEditValue(item.name);
-    setEditModalOpen(true);
-  };
 
-  // Add or Edit item
   const handleSave = async () => {
-    debugger;
     if (!formValue.trim()) return;
-
     try {
       const Param = { name: formValue, type: selectedType, user: user.user_id };
-
       await axios.post(`${API_URL}/Master/MasterInsert`, Param, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setFormValue("");
-      setEditingIndex(null);
       loadData();
     } catch (err) {
       console.error("Error saving data:", err);
     }
   };
 
-  // Delete item
   const handleDelete = async (id) => {
     try {
-
-        const param={
-            id:id
-        }
-      await axios.post(`${API_URL}/Master/MasterDelete`, param,{
+      await axios.post(`${API_URL}/Master/MasterDelete`, { id }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       loadData();
@@ -115,10 +84,14 @@ export default function MasterTableManager() {
     }
   };
 
-  // Edit item
+  const handleEdit = (item) => {
+    setEditingItem(item);
+    setEditValue(item.name);
+    setEditModalOpen(true);
+  };
+
   const handleUpdate = async () => {
     if (!editValue.trim()) return;
-debugger
     try {
       const Param = {
         id: editingItem.id,
@@ -126,223 +99,218 @@ debugger
         Type: editingItem.type,
         user: user.user_id,
       };
-
       await axios.post(`${API_URL}/Master/MasterUpdate`, Param, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setEditModalOpen(false);
-      setEditingItem(null);
-      loadData(); // refresh data
+      loadData();
     } catch (err) {
       console.error("Error updating data:", err);
     }
   };
 
   return (
-    <Grid container spacing={2} sx={{ p: 2, height: "83vh" }}>
-      {/* Left Sidebar */}
-      <Grid size={2} sx={{ height: "100%" }}>
-        <Paper
-          elevation={3}
-          sx={{
-            borderRadius: 3,
-            p: 2,
-            bgcolor: "background.paper",
-            height: "100%",
-          }}
+    <Box
+      sx={{
+        display: "flex",
+        height: "85vh",
+        background: "linear-gradient(135deg, #f5f7fa 0%, #e4ebf5 100%)",
+        borderRadius: 3,
+        overflow: "hidden",
+      }}
+    >
+      {/* Sidebar */}
+      <Box
+        sx={{
+          width: 240,
+          background: "rgba(255,255,255,0.7)",
+          backdropFilter: "blur(10px)",
+          borderRight: "1px solid rgba(0,0,0,0.1)",
+          p: 2,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Typography
+          variant="h6"
+          fontWeight={700}
+          sx={{ mb: 3, textAlign: "center", color: "#1976d2" }}
         >
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-            Master Tables
-          </Typography>
-          <List>
-            {tableOptions.map((opt) => (
-              <ListItemButton
-                key={opt.name}
-                selected={selectedType === opt.name}
-                onClick={() => setSelectedType(opt.name)}
-                sx={{
-                  borderRadius: 2,
-                  mb: 1,
-                  "&.Mui-selected": {
-                    bgcolor: "primary.main",
-                    color: "white",
-                    "& .MuiListItemIcon-root": { color: "white" },
-                  },
-                }}
-              >
-                <ListItemIcon>{opt.icon}</ListItemIcon>
-                <ListItemText
-                  primary={opt.name.replace(/([A-Z])/g, " $1").trim()}
-                />
-              </ListItemButton>
-            ))}
-          </List>
-        </Paper>
-      </Grid>
-
-      {/* Right Content */}
-      <Grid size={10} sx={{ height: "100%" }}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 3,
-            height: "100%",
-            overflowY: "auto",
-          }}
-        >
-          {/* Add / Edit Form */}
-          <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
-            <CardHeader
-              title={`${editingIndex ? "Edit" : "Add"} ${selectedType
-                .replace(/([A-Z])/g, " $1")
-                .trim()}`}
+          Master Tables
+        </Typography>
+        <List sx={{ flex: 1 }}>
+          {tableOptions.map((opt) => (
+            <ListItemButton
+              key={opt.name}
+              selected={selectedType === opt.name}
+              onClick={() => setSelectedType(opt.name)}
               sx={{
-                bgcolor: "primary.main",
-                color: "white",
-                borderTopLeftRadius: 12,
-                borderTopRightRadius: 12,
-              }}
-            />
-            <CardContent
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-                flexWrap: "wrap",
-                p: 2,
+                borderRadius: 2,
+                mb: 1,
+                color: selectedType === opt.name ? "#1f2937" : "#333",
+                backgroundColor: selectedType === opt.name ? "#1f2937" : "transparent",
+                "&:hover": {
+                  backgroundColor:
+                    selectedType === opt.name
+                      ? "#115293"
+                      : "rgba(25,118,210,0.1)",
+                },
               }}
             >
-              <Input
-                placeholder={`Enter ${selectedType
-                  .replace(/([A-Z])/g, " $1")
-                  .trim()} name`}
-                value={formValue}
-                onChange={(e) => setFormValue(e.target.value)}
+              <ListItemIcon
                 sx={{
-                  flex: 1,
-                  minWidth: 250,
-                  border: "1px solid #ccc",
-                  borderRadius: 2,
-                  px: 1.5,
-                  py: 0.5,
+                  color: selectedType === opt.name ? "#1f2937" : "#1976d2",
+                  minWidth: 35,
                 }}
-              />
-              <Button
-                variant="contained"
-                startIcon={<AddCircleOutlineIcon />}
-                onClick={handleSave}
-                sx={{ textTransform: "none", borderRadius: 2, px: 3 }}
               >
-                {editingIndex ? "Update" : "Add"}
-              </Button>
-            </CardContent>
-          </Card>
+                {opt.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={opt.name.replace(/([A-Z])/g, " $1").trim()}
+                primaryTypographyProps={{ fontWeight: 600 }}
+              />
+            </ListItemButton>
+          ))}
+        </List>
+      </Box>
 
-          {/* List Section */}
-          <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
-            <CardHeader
-              title={`${selectedType.replace(/([A-Z])/g, " $1").trim()} List`}
+      {/* Content */}
+      <Box sx={{ flex: 1, p: 3, display: "flex", flexDirection: "column" }}>
+        {/* Header */}
+        <Box
+          sx={{
+            background:
+              "linear-gradient(90deg, #1976d2 0%, #2196f3 100%)",
+            p: 2,
+            borderRadius: 2,
+            color: "white",
+            mb: 3,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="h6" fontWeight={700}>
+            {selectedType.replace(/([A-Z])/g, " $1").trim()} Management
+          </Typography>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <InputBase
+              placeholder={`Enter ${selectedType} name`}
+              value={formValue}
+              onChange={(e) => setFormValue(e.target.value)}
               sx={{
-                bgcolor: "grey.100",
-                borderTopLeftRadius: 12,
-                borderTopRightRadius: 12,
+                px: 2,
+                py: 0.8,
+                bgcolor: "white",
+                borderRadius: 2,
+                width: 300,
+                fontSize: 14,
               }}
             />
-            <CardContent>
-              {!masterData?.some((item) => item.type === selectedType) ? (
-                <Typography color="text.secondary" variant="body2">
-                  No records yet.
-                </Typography>
-              ) : (
-                <Box
-                  component="table"
-                  sx={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    "& th, & td": {
-                      border: "1px solid #e0e0e0",
-                      p: 1.5,
-                      textAlign: "left",
-                    },
-                    "& thead": { bgcolor: "grey.100", fontWeight: 600 },
-                    "& tr:hover": { bgcolor: "grey.50" },
-                  }}
-                >
-                  <thead>
-                    <tr>
-                      <th style={{ width: "5%" }}>#</th>
-                      <th>Name</th>
-                      <th>Type</th>
-                      <th>Created At</th>
-                      <th>Created By</th>
-                      <th style={{ width: "15%" }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {masterData
-                      .filter((item) => item.type === selectedType)
-                      .map((item, index) => (
-                        <tr key={item.id || index}>
-                          <td>{index + 1}</td>
-                          <td>{item.name}</td>
-                          <td>{item.type}</td>
-                          <td>{new Date(item.createdAt).toLocaleString()}</td>
-                          <td>{item.username}</td>
-                          <td>
-                            <IconButton onClick={() => handleEdit(item)}>
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                            <IconButton onClick={() => handleDelete(item.id)}>
-                              <DeleteIcon fontSize="small" color="error" />
-                            </IconButton>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
+            <Button
+              variant="contained"
+              color="inherit"
+              onClick={handleSave}
+              startIcon={<AddCircleOutlineIcon />}
+              sx={{
+                color: "#1976d2",
+                fontWeight: 600,
+                borderRadius: 2,
+                textTransform: "none",
+                bgcolor: "#fff",
+                "&:hover": { bgcolor: "#e3f2fd" },
+              }}
+            >
+              Add
+            </Button>
+          </Box>
         </Box>
-      </Grid>
-    <Dialog
-  open={editModalOpen}
-  onClose={() => setEditModalOpen(false)}
-  maxWidth="sm"
-  fullWidth
->
-  <DialogTitle>Edit {editingItem?.type}</DialogTitle>
-  <DialogContent dividers>
-    <TextField
-      label={`${editingItem?.type} Name`}
-      variant="outlined"    
-      fullWidth
-      value={editValue}
-      onChange={(e) => setEditValue(e.target.value)}
-      sx={{ mt: 1 }}
-      autoFocus
-    />
-  </DialogContent>
-  <DialogActions sx={{ px: 3, pb: 2 }}>
-    <Button
-      variant="outlined"
-      color="secondary"
-      onClick={() => setEditModalOpen(false)}
-    >
-      Cancel
-    </Button>
-    <Button
-      variant="contained"
-      color="primary"
-      onClick={handleUpdate}
-    >
-      Update
-    </Button>
-  </DialogActions>
-</Dialog>
 
-    </Grid>
+        {/* Table */}
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: "auto",
+            borderRadius: 2,
+            bgcolor: "#fff",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+          }}
+        >
+          <Box
+            component="table"
+            sx={{
+              width: "100%",
+              borderCollapse: "collapse",
+              "& th, & td": {
+                borderBottom: "1px solid #eee",
+                p: 1.5,
+                textAlign: "left",
+                fontSize: 14,
+              },
+              "& th": {
+                bgcolor: "#f5f5f5",
+                fontWeight: 700,
+                color: "#333",
+              },
+              "& tr:hover td": {
+                bgcolor: "#f9fafc",
+              },
+            }}
+          >
+            <thead>
+              <tr>
+                <th style={{ width: "5%" }}>#</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Created At</th>
+                <th>Created By</th>
+                <th style={{ width: "10%" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {masterData
+                .filter((i) => i.type === selectedType)
+                .map((item, index) => (
+                  <tr key={item.id}>
+                    <td>{index + 1}</td>
+                    <td>{item.name}</td>
+                    <td>{item.type}</td>
+                    <td>{new Date(item.createdAt).toLocaleString()}</td>
+                    <td>{item.username}</td>
+                    <td>
+                      <IconButton size="small" onClick={() => handleEdit(item)}>
+                        <EditIcon fontSize="small" color="primary" />
+                      </IconButton>
+                      <IconButton size="small" onClick={() => handleDelete(item.id)}>
+                        <DeleteIcon fontSize="small" color="error" />
+                      </IconButton>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Edit Dialog */}
+      <Dialog open={editModalOpen} onClose={() => setEditModalOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit {editingItem?.type}</DialogTitle>
+        <DialogContent dividers>
+          <TextField
+            fullWidth
+            label={`${editingItem?.type} Name`}
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setEditModalOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleUpdate}>
+            Update
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }

@@ -12,6 +12,7 @@ import Memebertaskprofile from "./components/Memebertaskprofile";
 import MyTask from "./components/mytask/MyTask";
 import Users from "./components/Users";
 import MasterTableManager from "./components/MasterTableManager";
+import UserProfile from "./components/UserProfile";
 import { AuthProvider, useAuth } from "./components/AuthProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -53,6 +54,7 @@ function AppRoutes() {
         <Route path="/ViewMembers" element={<ViewMembers />} />
         <Route path="/Memebertaskprofile" element={<Memebertaskprofile />} />
         <Route path="/MasterTableManager" element={<MasterTableManager />} />
+         <Route path="/Settings" element={<UserProfile />} />
       </Route>
     </Routes>
   );

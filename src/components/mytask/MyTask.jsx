@@ -36,6 +36,7 @@ import {
   Add as AddIcon,
   Reply as ReplyIcon,
   Visibility as VisibilityIcon,
+  SegmentSharp,
 } from "@mui/icons-material";
 import CreateProductionTaskPopup from "./CreateProductionTaskPopup";
 import axios from "axios";
@@ -43,7 +44,11 @@ import { useEffect } from "react";
 import { API_URL } from "../../Config/api";
 import { red } from "@mui/material/colors";
 import Productiontaskviewpopups from "./Productiontaskviewpopups";
-
+import { Close, AssignmentTurnedIn } from "@mui/icons-material";
+import DetailTaskForm from "./DetailTaskForm";
+import CheckerTaskForm from "./CheckerTaskForm";
+import TaskTableviewproduction from "./TaskTableviewproduction";
+import TaskAccordionView from "./TaskAccordionView";
 export default function TaskManagerCMS() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,6 +57,7 @@ export default function TaskManagerCMS() {
   const [openTask, setOpenTask] = useState(null);
   const [openReply, setOpenReply] = useState(false);
   const [openView, setOpenView] = useState(false);
+  const [selectmaintaskid, setselectmaintaskid] = useState("");
   const [replyText, setReplyText] = useState("");
   const token = localStorage.getItem("token");
   const [selectedTask, setSelectedTask] = useState(null);
@@ -103,7 +109,8 @@ export default function TaskManagerCMS() {
   };
 
   const handleViewTask = (task) => {
-    setSelectedTask(task);
+    //  setSelectedTask(task);
+    setselectmaintaskid(task);
     setOpenView(true);
   };
 
@@ -134,9 +141,12 @@ export default function TaskManagerCMS() {
   };
 
   const [taskType, setTaskType] = useState("");
+  const [relyTaskType, setrelyTaskType] = useState(false);
   const [department, setDepartment] = useState("");
   const [subDepartment, setSubDepartment] = useState("");
+  const [taskrepltselectType, settaskrepltselectType] = useState("");
   const [title, setDescription] = useState("");
+  const[selectidexpand,Setselectidexpand]=useState("")
   const priorityColor = {
     hot: "error",
     Medium: "warning",
@@ -176,12 +186,45 @@ export default function TaskManagerCMS() {
       console.error("Error loading data:", err);
     }
   };
+ const mytaskmainsubtaskLoad = async () => {
+    try {
+      const param={
+        mytaskmainsubtaskLoad:selectidexpand
+      }
+      const res = await axios.post(
+        `${API_URL}/Task/mytaskmainsubtaskLoad`,
+        param, // no body
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
+      if (res.data.success && res.data.data) {
+      
+
+      } else {
+        console.error("Failed to load master task data:", res.data.message);
+      }
+    } catch (err) {
+      console.error("Error loading data:", err);
+    }
+  };
+  const handlerelyClose = () => {
+    setOpenReply(false);
+  };
+
+  const handlerelydetailcheckerClose = () => {
+    setrelyTaskType(false);
+
+    settaskrepltselectType("");
+  };
   return (
     <Box sx={{ p: 3, minHeight: "79vh" }}>
       {/* Header */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="h6" fontWeight={700}>
+        <Typography variant="h5" fontWeight={700}>
           My Tasks
         </Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
@@ -201,7 +244,7 @@ export default function TaskManagerCMS() {
           </Button>
         </Box>
       </Box>
-<Divider sx={{fontWeight:'bold'}}/>
+      <Divider sx={{ fontWeight: "bold" }} />
       {/* Table */}
       <Paper elevation={0} sx={{ borderRadius: 3, overflow: "hidden" }}>
         <TableContainer>
@@ -209,16 +252,36 @@ export default function TaskManagerCMS() {
             <TableHead>
               <TableRow>
                 <TableCell></TableCell>
-                <TableCell sx={{ width: "3%",fontWeight:'bold' }}>S.No</TableCell>
-                <TableCell sx={{ width: "14%",fontWeight:'bold' }}>Title</TableCell>{" "}
+                <TableCell sx={{ width: "3%", fontWeight: "bold" }}>
+                  S.No
+                </TableCell>
+                <TableCell sx={{ width: "14%", fontWeight: "bold" }}>
+                  Title
+                </TableCell>{" "}
                 {/* 👈 Expands */}
-                <TableCell sx={{ width: "4%",fontWeight:'bold' }}>Priority</TableCell>
-                <TableCell sx={{ width: "13%",fontWeight:'bold' }}>Created Time</TableCell>
-                <TableCell sx={{ width: "7%",fontWeight:'bold' }}>Created By</TableCell>
-                <TableCell sx={{ width: "8%",fontWeight:'bold' }}>Role</TableCell>
-                <TableCell sx={{ width: "8%",fontWeight:'bold' }}>Department</TableCell>
-                <TableCell sx={{ width: "7%",fontWeight:'bold' }}> Status</TableCell>
-                <TableCell sx={{ width: "9%",fontWeight:'bold' }} align="right">
+                <TableCell sx={{ width: "4%", fontWeight: "bold" }}>
+                  Priority
+                </TableCell>
+                <TableCell sx={{ width: "13%", fontWeight: "bold" }}>
+                  Created Time
+                </TableCell>
+                <TableCell sx={{ width: "7%", fontWeight: "bold" }}>
+                  Created By
+                </TableCell>
+                <TableCell sx={{ width: "8%", fontWeight: "bold" }}>
+                  Role
+                </TableCell>
+                <TableCell sx={{ width: "8%", fontWeight: "bold" }}>
+                  Department
+                </TableCell>
+                <TableCell sx={{ width: "7%", fontWeight: "bold" }}>
+                  {" "}
+                  Status
+                </TableCell>
+                <TableCell
+                  sx={{ width: "9%", fontWeight: "bold" }}
+                  align="right"
+                >
                   Actions
                 </TableCell>
               </TableRow>
@@ -234,9 +297,10 @@ export default function TaskManagerCMS() {
                       <TableCell>
                         <IconButton
                           size="small"
-                          onClick={() =>
-                            setOpenTask(openTask === task.id ? null : task.id)
-                          }
+                          onClick={() => {
+                            setOpenTask(openTask === task.id ? null : task.id);
+                            Setselectidexpand(task.id);
+                          }}
                         >
                           {openTask === task.id ? (
                             <KeyboardArrowUpIcon />
@@ -254,7 +318,7 @@ export default function TaskManagerCMS() {
 
                       {/* ✅ Task Details */}
                       <TableCell>
-                        <Typography >{task.title}</Typography>
+                        <Typography>{task.title}</Typography>
                       </TableCell>
 
                       {/* ✅ Priority with color */}
@@ -299,7 +363,7 @@ export default function TaskManagerCMS() {
 
                       {/* ✅ Actions */}
                       <TableCell align="right">
-                        <IconButton onClick={() => handleViewTask(task)}>
+                        <IconButton onClick={() => handleViewTask(task.id)}>
                           <VisibilityIcon />
                         </IconButton>
                         <IconButton onClick={() => handleReplyClick(task)}>
@@ -325,40 +389,8 @@ export default function TaskManagerCMS() {
                           timeout="auto"
                           unmountOnExit
                         >
-                          <Box sx={{ p: 2, ml: 6 }}>
-                            {task.replies && task.replies.length > 0 ? (
-                              task.replies.map((r) => (
-                                <Paper
-                                  key={r.id}
-                                  variant="outlined"
-                                  sx={{
-                                    p: 1.5,
-                                    mb: 1,
-                                    borderRadius: 2,
-                                    bgcolor: "#fafafa",
-                                  }}
-                                >
-                                  <Typography
-                                    variant="body2"
-                                    fontWeight={600}
-                                    color="primary"
-                                  >
-                                    {r.author} • {r.date}
-                                  </Typography>
-                                  <Typography variant="body2">
-                                    {r.message}
-                                  </Typography>
-                                </Paper>
-                              ))
-                            ) : (
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                              >
-                                No replies yet.
-                              </Typography>
-                            )}
-                          </Box>
+                        {/* <TaskTableviewproduction/> */}
+                        <TaskAccordionView/>
                         </Collapse>
                       </TableCell>
                     </TableRow>
@@ -387,26 +419,60 @@ export default function TaskManagerCMS() {
         maxWidth="lg"
         fullWidth
       >
-     <Productiontaskviewpopups/>
+        <Productiontaskviewpopups selectmaintaskid={selectmaintaskid} />
       </Dialog>
 
       {/* Reply Dialog */}
-      <Dialog open={openReply} onClose={() => setOpenReply(false)}>
-        <DialogTitle>Reply to Task</DialogTitle>
+      <Dialog
+        open={openReply}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{ sx: { borderRadius: 3, p: 1.5 } }}
+      >
+        {/* ==== Header ==== */}
+        <DialogTitle
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box display="flex" alignItems="center" gap={1}>
+            <AssignmentTurnedIn color="primary" />
+            Reply to Task
+          </Box>
+        </DialogTitle>
+
+        {/* ==== Select Task Type ==== */}
         <DialogContent>
-          <TextField
-            multiline
-            fullWidth
-            rows={4}
-            label="Your update"
-            value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
-          />
+          <FormControl fullWidth sx={{ mb: 3 }}>
+            <InputLabel id="task-type-label">Select Task Type</InputLabel>
+            <Select
+              labelId="task-type-label"
+              label="Select Task Type"
+              value={taskrepltselectType}
+              onChange={(e) => settaskrepltselectType(e.target.value)}
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              <MenuItem value="detail">Details Task</MenuItem>
+              <MenuItem value="checker">Checker Task</MenuItem>
+            </Select>
+          </FormControl>
         </DialogContent>
+
+        {/* ==== Footer ==== */}
         <DialogActions>
-          <Button onClick={() => setOpenReply(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleReplySubmit}>
-            Send
+          <Button onClick={handlerelyClose} color="inherit" variant="outlined">
+            Cancel
+          </Button>
+          <Button
+            onClick={() => setrelyTaskType(true)}
+            color="primary"
+            variant="contained"
+          >
+            Submit
           </Button>
         </DialogActions>
       </Dialog>
@@ -516,6 +582,26 @@ export default function TaskManagerCMS() {
             select Task
           </Button>
         </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={relyTaskType}
+        fullWidth
+        maxWidth="lg"
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: 3,
+            paddingX: 2,
+            paddingY: 1,
+          },
+        }}
+      >
+        {taskrepltselectType === "detail" && (
+          <DetailTaskForm onClickclose={handlerelydetailcheckerClose} />
+        )}
+        {taskrepltselectType === "checker" && (
+          <CheckerTaskForm onClickclose={handlerelydetailcheckerClose} />
+        )}
       </Dialog>
       {taskpopuptype === 1 && (
         <CreateProductionTaskPopup

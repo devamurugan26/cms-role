@@ -14,7 +14,7 @@ import ArticleIcon from "@mui/icons-material/Article";
 import PeopleIcon from "@mui/icons-material/People";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useNavigate } from "react-router-dom";
-
+import ContactEmergencyIcon from '@mui/icons-material/ContactEmergency';
 const miniWidth = 60;
 
 export default function Sidebar() {
@@ -25,8 +25,9 @@ export default function Sidebar() {
 
     { text: "Dashboard", icon: <HomeIcon />, path: "/Dashboard" },
     { text: "Users", icon: <PeopleIcon />, path: "/users" },
-    { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
     { text: "MasterTableManager", icon: <SettingsIcon />, path: "/MasterTableManager" },
+    { text: "Settings", icon: <ContactEmergencyIcon />, path: "/settings" },
+
   ];
 
   return (
